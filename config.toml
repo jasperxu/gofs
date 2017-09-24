@@ -1,0 +1,37 @@
+Project = "demo"
+Company = "jasperxu.com"
+Developer = "JasperXu"
+
+# 是否调试状态
+IsDebug = true
+
+# 是否启用HTTPS
+IsHTTPS = false
+
+# 网站地址
+URL = "http://127.0.0.1/"
+
+# 错误信息本地化
+I18nNoAccessRights = "没有访问权限"
+I18nFileNotFound = "文件不存在"
+
+I18nUploadError = "上传错误"
+I18nProhibitExt = "禁止上传的文件类型"
+I18nCreateError = "创建文件失败"
+I18nSaveError = "保存文件失败"
+I18nUploadSuccess = "上传成功"
+
+I18nDeleteError = "删除失败"
+I18nDeleteSuccess = "删除成功"
+
+# 禁止上传的文件后缀
+ProhibitExt = [".exe", ".bat", ".sh", ".js" ]
+# 允许最大文件 100M = 100*1024*1024
+MaxFileSize = 104857600
+
+# 为空表示任何人都可以读文件，否则在Get中需加入key参数。
+ReadKey = ""
+
+# 为空表示任何人都可以写文件，否则在Post中需加入key参数。
+WriteKey = ""
+
