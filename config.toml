@@ -9,7 +9,7 @@ IsDebug = true
 IsHTTPS = false
 
 # 访问地址
-URL = "http://127.0.0.1/"
+URL = "http://127.0.0.1:8080/"
 
 # 运行端口
 Port = "8080"

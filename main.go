@@ -170,7 +170,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		FileSize int64
 	}{
 		FileName: filepath.Base(fileFullName),
-		FullURL:  config.URL + filePath,
+		FullURL:  strings.TrimRight(config.URL, "/") + filePath,
 		FileSize: size,
 	}
 
