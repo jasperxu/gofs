@@ -6,12 +6,21 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 )
 
 // config 配置信息
 var config = new(Config)
+
+func init() {
+	// 修正Win下的目录问题
+	file, _ := exec.LookPath(os.Args[0])
+	dir, _ := path.Split(strings.Replace(file, "\\", "/", -1))
+	os.Chdir(dir)
+}
 
 func main() {
 	readConfig()
