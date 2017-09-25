@@ -13,7 +13,8 @@ type Config struct {
 
 	IsHTTPS bool
 
-	URL string
+	URL  string
+	Port string
 
 	I18nNoAccessRights string
 	I18nFileNotFound   string

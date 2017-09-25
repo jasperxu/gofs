@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -16,34 +17,41 @@ func main() {
 	readConfig()
 
 	http.HandleFunc("/", index)
-	http.ListenAndServe(":8080", nil)
+
+	log.Println("[gofs] Start at ", config.URL)
+	if config.IsHTTPS {
+		http.ListenAndServeTLS(":"+config.Port, "./server.crt", "./server.key", nil)
+	} else {
+		http.ListenAndServe(":"+config.Port, nil)
+	}
+	log.Println("[gofs] Stopped.")
 }
 
 // index 页面
-// Get, [key] 为显示上传页面
-// Get, [key], path 为获取path路径的文件
-// Delete, [key], path 为删除path路径的文件或文件夹
+// Get, [key] 显示上传页面"/"
+// Get, [key] 获取指定文件"/path/file"
+// Delete, [key] 删除指定文件或文件夹"/path/file"或"/path"
 // Post, [key], path, upload 为上传文件并保存到path路径
 func index(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	if r.Method == "GET" {
 		// 判断读权限
-		if config.ReadKey != "" && config.ReadKey != r.FormValue("key") {
+		if config.ReadKey != "" && config.ReadKey != r.URL.RawQuery {
 			Output{Status: "error", Message: config.I18nNoAccessRights, Data: nil}.Writer2Response(w)
 			return
 		}
 
-		if r.FormValue("path") == "" {
+		if r.URL.Path == "/" {
 			// 显示上传页面
 			uploadPage(w, r)
 		} else {
-			// 获取path路径的文件
+			// 获取路径的文件
 			getPath(w, r)
 		}
 	} else {
 		// 判断写权限
-		if config.WriteKey != "" && config.WriteKey != r.FormValue("key") {
+		if config.WriteKey != "" && (config.WriteKey != r.URL.RawQuery || config.WriteKey != r.FormValue("key")) {
 			Output{Status: "error", Message: config.I18nNoAccessRights, Data: nil}.Writer2Response(w)
 			return
 		}
@@ -79,10 +87,10 @@ file:<br /><input type="file" name="uploadfile"><br />
 	fmt.Fprintln(w, html)
 }
 
-// getPath ,Get, [key], path 为获取path路径的文件
+// getPath ,Get, [key] 为获取path路径的文件
 func getPath(w http.ResponseWriter, r *http.Request) {
 	// 获取文件
-	filePath := "./upload" + r.FormValue("path")
+	filePath := "./upload" + r.URL.Path
 	info, err := os.Stat(filePath)
 	if err != nil {
 		// 路径不存在
@@ -96,16 +104,9 @@ func getPath(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// deletePath ,Delete, [key], path 为删除path路径的文件或文件夹
+// deletePath ,Delete, [key] 为删除path路径的文件或文件夹
 func deletePath(w http.ResponseWriter, r *http.Request) {
-	// 判断访问权限
-	if config.WriteKey != "" && config.WriteKey != r.FormValue("key") {
-		Output{Status: "error", Message: config.I18nNoAccessRights, Data: nil}.Writer2Response(w)
-		return
-	}
-
-	// 有权访问
-	filePath := r.FormValue("path") // 必须以/开头
+	filePath := r.URL.Path
 	if os.RemoveAll("./upload"+filePath) != nil {
 		Output{Status: "error", Message: config.I18nDeleteError, Data: nil}.Writer2Response(w)
 		return
@@ -160,7 +161,7 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 		FileSize int64
 	}{
 		FileName: filepath.Base(fileFullName),
-		FullURL:  config.URL + "?path=" + filePath,
+		FullURL:  config.URL + filePath,
 		FileSize: size,
 	}
 
